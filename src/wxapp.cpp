@@ -1,3 +1,5 @@
+#include <memory>
+#include <stdexcept>
 #include <GL/gl3w.h>
 
 #include <wx/wxprec.h>
@@ -37,83 +39,56 @@ wxEND_EVENT_TABLE()
 wxIMPLEMENT_APP(App);
 // clang-format on
 
-class wxGLCanvasSubClass : public wxGLCanvas
+class Canvas : public wxGLCanvas
 {
 public:
-  wxGLCanvasSubClass(wxFrame* parent);
-  ~wxGLCanvasSubClass();
-  void Paintit(wxPaintEvent& event);
+  Canvas(wxFrame* parent);
+  void OnPaint(wxPaintEvent& event);
 
 protected:
   DECLARE_EVENT_TABLE();
 
 private:
-  void Render();
-
-  wxGLContext* gl_context;
+  std::unique_ptr<wxGLContext> gl_context;
 };
 
 // clang-format off
-BEGIN_EVENT_TABLE(wxGLCanvasSubClass, wxGLCanvas)
-    EVT_PAINT(wxGLCanvasSubClass::Paintit)
+BEGIN_EVENT_TABLE(Canvas, wxGLCanvas)
+    EVT_PAINT(Canvas::OnPaint)
 END_EVENT_TABLE()
 // clang-format on
 
-wxGLCanvasSubClass::wxGLCanvasSubClass(wxFrame* parent)
+Canvas::Canvas(wxFrame* parent)
     : wxGLCanvas(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0,
                  "GLCanvas")
 {
   int argc = 1;
   char* argv[1] = {wxString((wxTheApp->argv)[0]).char_str()};
   // while !IsShown() ?
-  gl_context = new wxGLContext(this);
-  int loaded = gladLoadGL();
-  // const GLubyte* glV = glGetString(GL_VERSION);
-  std::cout << "GLAD loaded: " << loaded << "\nVersion: " << GLVersion.major << std::endl;
+  gl_context = std::make_unique<wxGLContext>(this);
+  SetCurrent(*gl_context);
+
+  if (gl3wInit()) {
+    throw std::runtime_error("Failed to load OpenGL context");
+  }
 }
 
-wxGLCanvasSubClass::~wxGLCanvasSubClass()
+void Canvas::OnPaint(wxPaintEvent& WXUNUSED(event))
 {
-  delete gl_context;
-}
-
-void wxGLCanvasSubClass::Paintit(wxPaintEvent& WXUNUSED(event)) { Render(); }
-
-void wxGLCanvasSubClass::Render()
-{
-  SetCurrent();
   wxPaintDC(this);
   glClearColor(0.0, 0.0, 0.0, 1.0);
-  // glClear(GL_COLOR_BUFFER_BIT);  // TODO depth?
-  // glViewport(0, 0, (GLint)GetSize().x, (GLint)GetSize().y);
+  glClear(GL_COLOR_BUFFER_BIT);  // TODO depth?
 
-  // glBegin(GL_POLYGON);
-  // glColor3f(1.0, 1.0, 1.0);
-  // glVertex2f(-0.5, -0.5);
-  // glVertex2f(-0.5, 0.5);
-  // glVertex2f(0.5, 0.5);
-  // glVertex2f(0.5, -0.5);
-  // glColor3f(0.4, 0.5, 0.4);
-  // glVertex2f(0.0, -0.8);
-  // glEnd();
 
-  // glBegin(GL_POLYGON);
-  // glColor3f(1.0, 0.0, 0.0);
-  // glVertex2f(0.1, 0.1);
-  // glVertex2f(-0.1, 0.1);
-  // glVertex2f(-0.1, -0.1);
-  // glVertex2f(0.1, -0.1);
-  // glEnd();
-
-  // glFlush();
+  glFlush();
   SwapBuffers();
 }
 
 bool App::OnInit()
 {
   Frame* frame = new Frame("Hello World", wxPoint(50, 50), wxSize(450, 340));
-  new wxGLCanvasSubClass(frame);
   frame->Show(true);
+  new Canvas(frame);
   return true;
 }
 
