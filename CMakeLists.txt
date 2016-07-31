@@ -18,6 +18,8 @@ include(${wxWidgets_USE_FILE})
 find_package(PkgConfig REQUIRED)
 pkg_search_module(GLFW REQUIRED glfw3)
 
+message(WARNING "CLINT: ${wxWidgets_INCLUDE_DIRS}")
+
 include_directories(
   include
   ${wxWidgets_INCLUDE_DIRS}
