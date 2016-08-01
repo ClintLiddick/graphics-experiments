@@ -18,10 +18,9 @@ include(${wxWidgets_USE_FILE})
 find_package(PkgConfig REQUIRED)
 pkg_search_module(GLFW REQUIRED glfw3)
 
-message(WARNING "CLINT: ${wxWidgets_INCLUDE_DIRS}")
-
 include_directories(
   include
+  third-party/tinyobjloader
   ${wxWidgets_INCLUDE_DIRS}
   ${GLFW_INCLUDE_DIRS}
 )
@@ -31,6 +30,9 @@ add_library(glad
 
 add_library(gl3w
   src/gl3w.c)
+
+# add_library(tinyobjloader
+#   third-party/tinyobjloader/tiny_obj_loader.cc)
 
 add_executable(${PROJECT_NAME}
   src/wxapp.cpp)
@@ -58,3 +60,8 @@ target_link_libraries(gl3wtest
   gl3w
   ${GLFW_LIBRARIES}
 )
+
+add_executable(loadobj
+  src/loadobj.cpp
+  third-party/tinyobjloader/tiny_obj_loader.cc)
+
