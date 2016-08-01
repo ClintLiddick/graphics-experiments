@@ -10,14 +10,14 @@
 #include <wx/glcanvas.h>
 
 static const char* v_shader =
-    "#version 330\n"
+    "#version 330 core\n"
     "layout (location = 0) in vec3 vp;"
     "void main() {"
     "gl_Position = vec4 (vp, 1.0f);"
     "}";
 
 static const char* f_shader =
-    "#version 330\n"
+    "#version 330 core\n"
     "out vec4 color;"
     "void main() {"
     "color = vec4 (0.5f, 0.0f, 0.5f, 1.0f);"
@@ -35,8 +35,8 @@ class Canvas : public wxGLCanvas
 {
 public:
   Canvas(wxFrame* parent, const wxGLAttributes& canvas_attrs)
-      : wxGLCanvas(parent, canvas_attrs, wxID_ANY, wxDefaultPosition, wxDefaultSize,
-                   0, "GLCanvas")
+      : wxGLCanvas(parent, canvas_attrs, wxID_ANY, wxDefaultPosition,
+                   wxDefaultSize, 0, "GLCanvas")
       , shader_prog(0)
       , vbo(0)
       , vao(0)
@@ -98,19 +98,17 @@ public:
 
     // setup vert array objs
     glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
-
     glGenBuffers(1, &vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(points), points, GL_STATIC_DRAW);
 
-    glEnableVertexAttribArray(0);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, //3 * sizeof(GLfloat),
-                          (GLvoid*)0);
+    glBindVertexArray(vao);
+        glBindBuffer(GL_ARRAY_BUFFER, vbo);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(points), points, GL_STATIC_DRAW);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat),
+                            (GLvoid*)0);
+        glEnableVertexAttribArray(0);
 
-    glBindBuffer(GL_ARRAY_BUFFER, 0);  // TODO safe w/ above comment out?
-    glBindVertexArray(0);  // unbind vao
+        // glBindBuffer(GL_ARRAY_BUFFER, 0);  // TODO safe w/ above comment out?
+    glBindVertexArray(0);              // unbind vao
   }
 
   ~Canvas()
@@ -141,8 +139,8 @@ public:
     if ((err = glGetError()) != GL_NO_ERROR) {
       std::cerr << "OpenGL error drawing: " << err << std::endl;
     }
-    glFlush();
     glBindVertexArray(0);
+    // glFlush();
     SwapBuffers();
   }
 
@@ -224,7 +222,7 @@ public:
     frame->Show(true);
     wxGLAttributes canvas_attrs;
     canvas_attrs.PlatformDefaults().Defaults().EndList();
-    if(!wxGLCanvas::IsDisplaySupported(canvas_attrs)) {
+    if (!wxGLCanvas::IsDisplaySupported(canvas_attrs)) {
       std::cerr << "Display doesn't support OpenGL attributes" << std::endl;
       return false;
     }
