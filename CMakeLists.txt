@@ -1,13 +1,20 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 2.8.12)
 project(wxApp)
 
 include(CheckCXXCompilerFlag)
 CHECK_CXX_COMPILER_FLAG("-std=c++14" COMPILER_SUPPORTS_CXX14)
 if(COMPILER_SUPPORTS_CXX14)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
+  # set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stdlib=libc++ -lc++abi")
 else()
   message(ERROR "The compiler ${CMAKE_CXX_COMPILER} has no C++14 support. Please use a different C++ compiler.")
 endif()
+
+if(NOT DEFINED WX_INSTALL_PATH)
+  set(WX_INSTALL_PATH "/home/clint/installs")
+endif()
+
+set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} ${WX_INSTALL_PATH})
 
 set(wxWidgets_USE_LIBS)
 set(WXWINDOWS_USE_GL)
@@ -30,9 +37,6 @@ add_library(glad
 
 add_library(gl3w
   src/gl3w.c)
-
-# add_library(tinyobjloader
-#   third-party/tinyobjloader/tiny_obj_loader.cc)
 
 add_executable(${PROJECT_NAME}
   src/wxapp.cpp)
