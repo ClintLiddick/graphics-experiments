@@ -18,7 +18,7 @@ set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} ${WX_INSTALL_PATH})
 
 set(wxWidgets_USE_LIBS)
 set(WXWINDOWS_USE_GL)
-find_package(wxWidgets COMPONENTS core base gl REQUIRED)
+find_package(wxWidgets 3.1 COMPONENTS core base gl REQUIRED)
 find_package(wxWindows)
 include(${wxWidgets_USE_FILE})
 

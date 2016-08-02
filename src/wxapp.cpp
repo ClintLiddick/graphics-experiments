@@ -100,15 +100,15 @@ public:
     glGenVertexArrays(1, &vao);
     glGenBuffers(1, &vbo);
 
+    // start binding block
     glBindVertexArray(vao);
-        glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(points), points, GL_STATIC_DRAW);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat),
-                            (GLvoid*)0);
-        glEnableVertexAttribArray(0);
-
-        // glBindBuffer(GL_ARRAY_BUFFER, 0);  // TODO safe w/ above comment out?
-    glBindVertexArray(0);              // unbind vao
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(points), points, GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat),
+                          (GLvoid*)0);
+    glEnableVertexAttribArray(0);
+    glBindVertexArray(0);  // unbind vao
+    // end binding block
   }
 
   ~Canvas()
@@ -120,7 +120,6 @@ public:
 
   void OnPaint(wxPaintEvent& WXUNUSED(event))
   {
-    std::cout << "loop" << std::endl;
     SetCurrent(*gl_context);
     glViewport(0, 0, (GLint)GetSize().x, (GLint)GetSize().y);
     wxPaintDC(this);
