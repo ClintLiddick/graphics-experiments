@@ -8,6 +8,7 @@
 #include <wx/wx.h>
 #endif
 #include <wx/glcanvas.h>
+#include <wx/timer.h>
 
 static const char* v_shader =
     "#version 330 core\n"
@@ -19,15 +20,17 @@ static const char* v_shader =
 static const char* f_shader =
     "#version 330 core\n"
     "out vec4 color;"
+    "uniform vec4 vertColor;"
     "void main() {"
-    "color = vec4 (0.5f, 0.0f, 0.5f, 1.0f);"
+    "color = vertColor;"
     "}";
 
 // clang-format off
 static const GLfloat points[] = {
-    0.0f,  0.5f,  0.0f,
-    0.5f, -0.5f,  0.0f,
-    -0.5f, -0.5f,  0.0f
+     0.5f,  0.5f, 0.0f,
+     0.5f, -0.5f, 0.0f,
+    -0.5f, -0.5f, 0.0f,
+    -0.5f,  0.5f, 0.0f
 };
 // clang-format on
 
@@ -130,6 +133,11 @@ public:
     if ((err = glGetError()) != GL_NO_ERROR) {
       std::cerr << "OpenGL error using shader: " << err << std::endl;
     }
+
+    GLfloat green_color = (sin(wxGetLocalTime()) / 2) + 0.5;
+    glUniform4f(glGetUniformLocation(shader_prog, "vertColor"), 0.0f,
+                green_color, 0.0f, 1.0f);
+
     glBindVertexArray(vao);
     if ((err = glGetError()) != GL_NO_ERROR) {
       std::cerr << "OpenGL error binding array: " << err << std::endl;
@@ -160,6 +168,21 @@ BEGIN_EVENT_TABLE(Canvas, wxGLCanvas)
     EVT_PAINT(Canvas::OnPaint)
 END_EVENT_TABLE()
 // clang-format on
+
+class RenderTimer : public wxTimer
+{
+public:
+  RenderTimer(Canvas* canvas)
+      : wxTimer()
+      , canvas(canvas){};
+
+  void Notify() { canvas->Refresh(); }
+
+  void start() { wxTimer::Start(1); }
+
+private:
+  Canvas* canvas;
+};
 
 enum { ID_Hello = 1 };
 
@@ -225,9 +248,13 @@ public:
       std::cerr << "Display doesn't support OpenGL attributes" << std::endl;
       return false;
     }
-    new Canvas(frame, canvas_attrs);
+    Canvas *canvas = new Canvas(frame, canvas_attrs);
+    timer = std::make_unique<RenderTimer>(canvas);
+    timer->start();
     return true;
   }
+private:
+  std::unique_ptr<RenderTimer> timer;
 };
 
 wxIMPLEMENT_APP(App);
