@@ -1,0 +1,6 @@
+[submodule "third-party/tinyobjloader"]
+	path = third-party/tinyobjloader
+	url = https://github.com/syoyo/tinyobjloader.git
+[submodule "third-party/nanogui"]
+	path = third-party/nanogui
+	url = https://github.com/wjakob/nanogui.git
