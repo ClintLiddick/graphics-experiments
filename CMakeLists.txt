@@ -25,12 +25,18 @@ include(${wxWidgets_USE_FILE})
 find_package(PkgConfig REQUIRED)
 pkg_search_module(GLFW REQUIRED glfw3)
 
+add_subdirectory(third-party/nanogui)
+
 include_directories(
   include
   third-party/tinyobjloader
+  third-party/nanogui/include
+  ${NANOGUI_EXTRA_INCS}
   ${wxWidgets_INCLUDE_DIRS}
   ${GLFW_INCLUDE_DIRS}
 )
+
+add_definitions(${NANOGUI_EXTRA_DEFS})
 
 add_library(glad
   src/glad.c)
@@ -69,3 +75,17 @@ add_executable(loadobj
   src/loadobj.cpp
   third-party/tinyobjloader/tiny_obj_loader.cc)
 
+add_executable(nanoguitest
+  src/nanoguitest.cpp)
+
+target_link_libraries(nanoguitest
+  nanogui
+  ${NANOGUI_EXTRA_LIBS})
+
+add_executable(nanoguiglfw
+  src/nanoguiglfw.cpp)
+
+target_link_libraries(nanoguiglfw
+  nanogui
+  gl3w
+  ${NANOGUI_EXTRA_LIBS})
