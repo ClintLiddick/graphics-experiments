@@ -1,0 +1,11 @@
+build --cxxopt=-std=c++14
+build --per_file_copt -third-party/.*@-Wall,-Werror,-pedantic,-Wno-error=strict-overflow,-Wno-error=deprecated-declarations
+build --strip=never
+test --test_output=all
+
+# Python configuration
+build --action_env PYTHON_BIN_PATH=/usr/bin/python3
+build --python_path=/usr/bin/python3
+
+# don't show build errors from external libraries
+build --output_filter='^//(?!third_party)'
