@@ -1,5 +1,7 @@
 licenses(["notice"])  # zlib/libpng
 
+package(default_visibility = ["//visibility:public"])
+
 cc_library(
     name = "glfw",
     hdrs = [
@@ -34,10 +36,19 @@ cc_library(
         "src/egl_context.h",
     ],
     strip_include_prefix = "include",
-    linkopts = ["-lGL", "-lX11"],
+    linkopts = [
+        "-ldl",
+        "-lGL",
+        "-lX11",
+        "-lXrandr",
+        "-lXi",
+        "-lXxf86vm",
+        "-lXcursor",
+        "-lXinerama",
+        "-lpthread",
+    ],
     copts = ["-fpic"],
     defines = [
         "_GLFW_X11",
-    ],
-    visibility = ["//visibility:public"],
+    ]
 )

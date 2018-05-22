@@ -1,8 +1,14 @@
 #include <iostream>
 
+#include "glad/glad.h"
 #include "GLFW/glfw3.h"
 
 int main() {
-    std::cout << "hi" << std::endl;
-    return 0;
+    if (!glfwInit()) {
+        std::cerr << "FAIL" << std::endl;
+    } else {
+        std::cout << "SUCCESS" << std::endl;
+    }
+
+    glfwTerminate();
 }
