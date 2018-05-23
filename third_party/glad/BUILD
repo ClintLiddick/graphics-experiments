@@ -6,6 +6,6 @@ cc_library(
     name = "glad",
     hdrs = ["glad/glad.h"],
     srcs = ["glad.c"],
-    deps = ["//third-party/khr"],
+    deps = ["//third_party/khr"],
     strip_include_prefix = "",
 )
