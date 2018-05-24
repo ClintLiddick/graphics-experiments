@@ -1,4 +1,5 @@
-licenses(["unencumbered"])  # public domain
+licenses(["reciprocal"])  # MPL2
+exports_files(["COPYING.MPL2"])
 
 package(default_visibility = ["//visibility:public"])
 
