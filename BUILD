@@ -6,6 +6,7 @@ cc_binary(
         "//third_party/glad",
         "//third_party/glfw",
         "//third_party/imgui",
+        "//third_party/eigen",
     ],
     data = [
         "//third_party/imgui:fonts",

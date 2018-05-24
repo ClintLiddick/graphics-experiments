@@ -4,6 +4,7 @@
 
 #include "glad/glad.h"  // must be before all other GL includes
 
+#include "Eigen/Dense"
 #include "GLFW/glfw3.h"
 #include "imgui.h"
 #include "imgui_helper.hh"
@@ -50,23 +51,37 @@ int main() {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     auto &imgui_io = ImGui::GetIO();
-    imgui_io.Fonts->AddFontFromFileTTF("third-party/imgui/misc/fonts/Roboto-Medium.ttf", 15.0f);
+    imgui_io.Fonts->AddFontFromFileTTF("third_party/imgui/misc/fonts/Roboto-Medium.ttf", 15.0f);
     constexpr bool INSTALL_IMGUI_CALLBACKS = false;
     imgui::Init(window, INSTALL_IMGUI_CALLBACKS);
     ImGui::StyleColorsDark();
 
-    // GL
+    // TRANSFORMS
+    const Eigen::Matrix4f model = Eigen::Matrix4f::Identity();
+    Eigen::Matrix4f view = Eigen::Matrix4f::Identity();
+    Eigen::Matrix4f projection = Eigen::Matrix4f::Identity();
+    // clang-format off
+    projection <<
+        0.1f, 0.0f, 0.0f, 0.0f,
+        0.0f, 0.1f, 0.0f, 0.0f,
+        0.0f, 0.0f, 1.0f, 0.0f,
+        0.0f, 0.0f, 0.0f, 1.0f;
+    // clang-format on
 
+    // GL
     int success;
     char info_log[512];
 
     const char *vert_shader_txt = R"(
 #version 330 core
-layout (location = 0) in vec3 aPos;
+layout (location = 0) in vec2 aPos;
+uniform mat4 model;
+uniform mat4 view;
+uniform mat4 projection;
 
 void main()
 {
-    gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);
+    gl_Position = projection * view * model * vec4(aPos.x, aPos.y, 0.0, 1.0);
 }
 )";
 
@@ -120,15 +135,13 @@ void main()
 
     // clang-format off
     const float verts[] = {
-         0.5f,  0.5f, 0.0f,  // top right
-         0.5f, -0.5f, 0.0f,  // bottom right
-        -0.5f, -0.5f, 0.0f,  // bottom left
-        -0.5f,  0.5f, 0.0f   // top left
+         0.0f,  0.0f,  // top
+        -2.0f, -2.0f,  // bottom left
+         2.0f, -2.0f,  // bottom right
     };
 
     const uint indices[] = {
-        0, 1, 3,
-        1, 2, 3
+        0, 1, 2,
     };
     // clang-format on
 
@@ -145,7 +158,7 @@ void main()
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void *)0);
     glEnableVertexAttribArray(0);
 
     // unbind
@@ -156,6 +169,7 @@ void main()
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
 
+        // clear and setup
         int display_w, display_h;
         glfwGetFramebufferSize(window, &display_w, &display_h);
         glViewport(0, 0, display_w, display_h);
@@ -163,6 +177,17 @@ void main()
         glClearColor(0.0, 0.0, 0.0, 1.0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        // uniforms
+        const int model_unif = glGetUniformLocation(shader_prog, "model");
+        glUniformMatrix4fv(model_unif, 1, GL_FALSE, model.data());
+
+        const int view_unif = glGetUniformLocation(shader_prog, "view");
+        glUniformMatrix4fv(view_unif, 1, GL_FALSE, view.data());
+
+        const int projection_unif = glGetUniformLocation(shader_prog, "projection");
+        glUniformMatrix4fv(projection_unif, 1, GL_FALSE, projection.data());
+
+        // draw
         glUseProgram(shader_prog);
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
