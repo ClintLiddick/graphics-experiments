@@ -8,7 +8,7 @@
 #include "imgui.h"
 #include "imgui_helper.hh"
 
-constexpr GLuint WIDTH = 1280, HEIGHT = 720;
+constexpr GLuint WIDTH = 1280, HEIGHT = 1280;
 
 void key_callback(GLFWwindow *window, int key, int scancode, int action, int mode) {
     if (ImGui::GetIO().WantCaptureKeyboard) {
@@ -45,7 +45,6 @@ int main() {
         std::cerr << "Failed to load OpenGL context" << std::endl;
         return EXIT_FAILURE;
     }
-    glEnable(GL_DEPTH_TEST);
 
     // IMGUI
     IMGUI_CHECKVERSION();
@@ -83,11 +82,12 @@ void main()
 
     const char *frag_shader_txt = R"(
 #version 330 core
-out vec4 FragColor;
+// in vec3 texCoord;
+out vec4 frag_color;
 
 void main()
 {
-    FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);
+    frag_color = vec4(1.0f, 0.0f, 0.0f, 1.0f);
 }
 )";
 
@@ -123,12 +123,12 @@ void main()
          0.5f,  0.5f, 0.0f,  // top right
          0.5f, -0.5f, 0.0f,  // bottom right
         -0.5f, -0.5f, 0.0f,  // bottom left
-        // -0.5f,  0.5f, 0.0f   // top left
+        -0.5f,  0.5f, 0.0f   // top left
     };
 
     const uint indices[] = {
-        0, 1, 3
-        // 1, 2, 3
+        0, 1, 3,
+        1, 2, 3
     };
     // clang-format on
 
@@ -159,6 +159,7 @@ void main()
         int display_w, display_h;
         glfwGetFramebufferSize(window, &display_w, &display_h);
         glViewport(0, 0, display_w, display_h);
+        glEnable(GL_DEPTH_TEST);
         glClearColor(0.0, 0.0, 0.0, 1.0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -169,10 +170,10 @@ void main()
 
         // imgui
         // TODO render on top
-        imgui::NewFrame();
-        ImGui::ShowDemoWindow();
-        ImGui::Render();
-        imgui::RenderDrawData(ImGui::GetDrawData());
+        // imgui::NewFrame();
+        // ImGui::ShowDemoWindow();
+        // ImGui::Render();
+        // imgui::RenderDrawData(ImGui::GetDrawData());
 
         glfwSwapBuffers(window);
     }
