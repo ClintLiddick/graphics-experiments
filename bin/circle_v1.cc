@@ -6,18 +6,12 @@
 
 #include "Eigen/Dense"
 #include "GLFW/glfw3.h"
-#include "imgui.h"
-#include "imgui_helper.hh"
 
 constexpr GLuint WIDTH = 1280, HEIGHT = 1280;
 
 void key_callback(GLFWwindow *window, int key, int scancode, int action, int mode) {
-    if (ImGui::GetIO().WantCaptureKeyboard) {
-        imgui::KeyCallback(window, key, scancode, action, mode);
-    } else {
-        if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
-            glfwSetWindowShouldClose(window, GL_TRUE);
-        }
+    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
+        glfwSetWindowShouldClose(window, GL_TRUE);
     }
 }
 
@@ -38,23 +32,11 @@ int main() {
     }
 
     glfwSetKeyCallback(window, key_callback);
-    glfwSetMouseButtonCallback(window, imgui::MouseButtonCallback);
-    glfwSetScrollCallback(window, imgui::ScrollCallback);
-    glfwSetCharCallback(window, imgui::CharCallback);
 
     if (!gladLoadGL()) {
         std::cerr << "Failed to load OpenGL context" << std::endl;
         return EXIT_FAILURE;
     }
-
-    // IMGUI
-    IMGUI_CHECKVERSION();
-    ImGui::CreateContext();
-    auto &imgui_io = ImGui::GetIO();
-    imgui_io.Fonts->AddFontFromFileTTF("third_party/imgui/misc/fonts/Roboto-Medium.ttf", 15.0f);
-    constexpr bool INSTALL_IMGUI_CALLBACKS = false;
-    imgui::Init(window, INSTALL_IMGUI_CALLBACKS);
-    ImGui::StyleColorsDark();
 
     // TRANSFORMS
     const Eigen::Matrix4f model = Eigen::Matrix4f::Identity();
@@ -228,18 +210,8 @@ void main()
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);
 
-        // imgui
-        // TODO render on top
-        // imgui::NewFrame();
-        // ImGui::ShowDemoWindow();
-        // ImGui::Render();
-        // imgui::RenderDrawData(ImGui::GetDrawData());
-
         glfwSwapBuffers(window);
     }
-
-    imgui::Shutdown();
-    ImGui::DestroyContext();
 
     glfwDestroyWindow(window);
     glfwTerminate();
