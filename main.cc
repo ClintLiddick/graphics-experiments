@@ -74,18 +74,34 @@ int main() {
 
     const char *vert_shader_txt = R"(
 #version 330 core
-layout (location = 0) in vec2 aPos;
+layout (location = 0) in vec2 vert_;
+layout (location = 1) in vec2 center_;
+layout (location = 2) in float radius_;
+
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
 
+out vec2 center;
+out float radius;
+out vec2 coord;
+
 void main()
 {
-    gl_Position = projection * view * model * vec4(aPos.x, aPos.y, 0.0, 1.0);
+    mat4 mvp = projection * view * model;
+
+    gl_Position = mvp * vec4(vert_, 0.0, 1.0);
+    coord = gl_Position.xy;
+
+    vec4 center_vec = vec4(center_, 0.0, 1.0);
+    center = center_vec.xy;
+
+    vec4 rad_vec = vec4(radius_, 0.0, 0.0, 1.0);
+    radius = (mvp * rad_vec).x;
 }
 )";
 
-    uint vert_shader = glCreateShader(GL_VERTEX_SHADER);
+    const uint vert_shader = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vert_shader, 1, &vert_shader_txt, nullptr);
     glCompileShader(vert_shader);
     glGetShaderiv(vert_shader, GL_COMPILE_STATUS, &success);
@@ -97,12 +113,21 @@ void main()
 
     const char *frag_shader_txt = R"(
 #version 330 core
-// in vec3 texCoord;
+
+in vec2 center;
+in float radius;
+in vec2 coord;
+
 out vec4 frag_color;
 
 void main()
 {
-    frag_color = vec4(1.0f, 0.0f, 0.0f, 1.0f);
+    
+    if (distance(center, coord) >= radius) {
+        frag_color = vec4(0.0f, 0.0f, 0.0f, 0.0f);
+    } else {
+        frag_color = vec4(1.0f, 0.0f, 0.0f, 1.0f);
+    }
 }
 )";
 
@@ -134,14 +159,18 @@ void main()
     // TRIANGLE
 
     // clang-format off
+    const float radius = 1.0;
     const float verts[] = {
-         0.0f,  0.0f,  // top
-        -2.0f, -2.0f,  // bottom left
-         2.0f, -2.0f,  // bottom right
+        // x     y      center    radius
+        -2.0f,  2.0f, 0.0f, 0.0f, radius, // top left
+        -2.0f, -2.0f, 0.0f, 0.0f, radius, // bottom left
+         2.0f, -2.0f, 0.0f, 0.0f, radius, // bottom right
+         2.0f,  2.0f, 0.0f, 0.0f, radius, // top right
     };
 
     const uint indices[] = {
         0, 1, 2,
+        2, 3, 0,
     };
     // clang-format on
 
@@ -158,8 +187,12 @@ void main()
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void *)0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)0);
     glEnableVertexAttribArray(0);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)(2 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)(4 * sizeof(float)));
+    glEnableVertexAttribArray(2);
 
     // unbind
     glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -176,6 +209,8 @@ void main()
         glEnable(GL_DEPTH_TEST);
         glClearColor(0.0, 0.0, 0.0, 1.0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
         // uniforms
         const int model_unif = glGetUniformLocation(shader_prog, "model");
