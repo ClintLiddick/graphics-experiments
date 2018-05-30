@@ -1,7 +1,5 @@
 licenses(["notice"])  # zlib/libpng
 
-package(default_visibility = ["//visibility:public"])
-
 cc_library(
     name = "glfw",
     hdrs = [
@@ -50,5 +48,6 @@ cc_library(
     copts = ["-fpic"],
     defines = [
         "_GLFW_X11",
-    ]
+    ],
+    visibility = ["//gl:__pkg__"],
 )

@@ -1,11 +1,10 @@
 licenses(["unencumbered"])  # public domain
 
-package(default_visibility = ["//visibility:public"])
-
 cc_library(
     name = "glad",
     hdrs = ["glad/glad.h"],
     srcs = ["glad.c"],
     deps = ["//third_party/khr"],
     strip_include_prefix = "",
+    visibility = ["//gl:__pkg__"],
 )

@@ -1,9 +1,16 @@
 cc_binary(
+    name = "empty",
+    srcs = ["empty.cc"],
+    deps = [
+        "//third_party/glog",
+    ],
+)
+
+cc_binary(
     name = "circle_v1",
     srcs = ["circle_v1.cc"],
     deps = [
-        "//third_party/glad",
-        "//third_party/glfw",
+        "//gl:includes",
         "//third_party/eigen",
     ],
 )
@@ -13,8 +20,7 @@ cc_binary(
     srcs = ["imgui_demo.cc"],
     deps = [
         "//:imgui_helper",
-        "//third_party/glad",
-        "//third_party/glfw",
+        "//gl:includes",
         "//third_party/imgui",
     ],
     data = [
