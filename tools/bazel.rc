@@ -1,5 +1,7 @@
 build --cxxopt=-std=c++14
-build --per_file_copt -third_party/.*@-Wall,-Werror,-pedantic,-Wno-error=strict-overflow,-Wno-error=deprecated-declarations
+build --copt -g
+build --copt -O2
+build --per_file_copt -third_party/.*@-Wall,-Werror,-Wextra,-Wno-error=strict-overflow,-Wno-error=deprecated-declarations
 build --strip=never
 test --test_output=all
 
