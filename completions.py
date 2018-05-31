@@ -3,6 +3,8 @@
 import argparse
 import subprocess
 
+from third_party.bazel.proto.extra_actions_base_pb2 import ExtraActionSummary, CppCompileInfo
+import google.protobuf.text_format as text_format
 
 def file_package_path_from_filename(filename):
     result = subprocess.run(
@@ -37,7 +39,9 @@ def print_action(target):
             universal_newlines=True)
     return result.stdout
 
-
+def cpp_compile_info_from_proto(extra_action_summary):
+    action = extra_action_summary.action[0].action
+    return action.Extensions[CppCompileInfo.cpp_compile_info]
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -47,5 +51,8 @@ if __name__ == '__main__':
     file_pkg_path = file_package_path_from_filename(args.filename)
     target = target_from_path(file_pkg_path)
     action_proto_str = print_action(target)
-    print(action_proto_str)
-
+    extra_action_summary = ExtraActionSummary()
+    text_format.Merge(action_proto_str, extra_action_summary)
+    cpp_compile_info = cpp_compile_info_from_proto(extra_action_summary)
+    print(cpp_compile_info.compiler_option)
+    print(cpp_compile_info.sources_and_headers)
